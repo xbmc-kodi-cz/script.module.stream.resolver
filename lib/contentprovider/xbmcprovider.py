@@ -28,6 +28,7 @@ import resolver
 import time
 import xbmcplugin
 import xbmc
+import xbmcvfs
 import xbmcgui
 import urllib.parse
 import urllib.request, urllib.parse, urllib.error
@@ -189,9 +190,10 @@ class XBMContentProvider(object):
             if 'headers' in list(stream.keys()):
                 headerStr = '|' + urllib.parse.urlencode(stream['headers'])
                 if len(headerStr) > 1:
-                    stream['url'] += headerStr
+                    stream['url'] += headerStr.encode('utf-8')
             print('Sending %s to player' % stream['url'])
-            li = xbmcgui.ListItem(path=stream['url'], iconImage='DefaulVideo.png')
+            li = xbmcgui.ListItem(path=stream['url'])
+            li.setArt({'icon': 'DefaulVideo.png'})
             il = self._extract_infolabels(item['info'])
             if len(il) > 0:  # only set when something was extracted
                 li.setInfo('video', il)
@@ -371,7 +373,7 @@ class XBMCLoginOptionalContentProvider(XBMContentProvider):
         self.check_setting_keys(['vip'])
 
     def ask_for_captcha(self, params):
-        img = os.path.join(str(xbmc.translatePath(
+        img = os.path.join(str(xbmcvfs.translatePath(
             self.addon.getAddonInfo('profile'))), 'captcha.png')
         util.save_to_file(params['img'], img)
         cd = CaptchaDialog('captcha-dialog.xml',
